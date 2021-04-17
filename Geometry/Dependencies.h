@@ -9,4 +9,4 @@
 
 #include "Shapes.h"
 
-constexpr double Pi = 3.14159;
+constexpr float Pi = 3.14159f;

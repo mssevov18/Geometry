@@ -1,32 +1,34 @@
-#include "Dependencies.h"
+﻿#include "Dependencies.h"
 
 //Move complex constructors to shapes.cpp
 //Move complex getters and setters to shapes.cpp
 
 Position::Position()
 {
-	x = 0.0; y = 0.0;
+	x = 0.0;
+	y = 0.0;
 }
-Position::Position(double inX, double inY)
+Position::Position(float inX, float inY)
 {
-	X(inX); Y(inY);
+	X(inX);
+	Y(inY);
 }
 
-double Position::X(void)
+float Position::X(void)
 {
 	return x;
 }
-void Position::X(double inX)
+void Position::X(float inX)
 {
 	/* Input validation */
 	x = inX;
 }
 
-double Position::Y(void)
+float Position::Y(void)
 {
 	return y;
 }
-void Position::Y(double inY)
+void Position::Y(float inY)
 {
 	/* Input validation */
 	y = inY;
@@ -42,6 +44,10 @@ void Position::Print()
 	std::wcout << (x >= 0 ? (x < 10 ? "( " : "(") : "(") << x 
 			  << (y >= 0 ? (y < 10 ? ", " : ",") : ",") << y
 			  << ")";
+}
+bool Position::IsEqual(Position inPos)
+{
+	return (X() == inPos.X()) * (Y() == inPos.Y());
 }
 
 
@@ -75,17 +81,26 @@ void Shape::Print()
 {
 	std::wcout << name;
 }
+bool Shape::IsEqual(Shape inShape)
+{
+	return Name() == inShape.Name();
+}
 
 
 
 Vertex::Vertex()
 {
-	pos = Position();
+
 }
 Vertex::Vertex(std::wstring inName, Position inPos)
 {
 	Name(inName);
-	pos.Copy(inPos);
+	Pos(inPos);
+}
+Vertex::Vertex(std::wstring inName, float inX, float inY)
+{
+	Name(inName);
+	Pos(Position(inX, inY));
 }
 
 Position Vertex::Pos(void)
@@ -96,11 +111,6 @@ void Vertex::Pos(Position inPos)
 {
 	pos.Copy(inPos);
 }
-void Vertex::Pos(double inX, double inY)
-{
-	Pos(Position(inX, inY));
-}
-
 
 void Vertex::Copy(Vertex inVert)
 {
@@ -112,12 +122,16 @@ void Vertex::Print()
 	std::wcout << "pt." << name << " = ";
 	pos.Print();
 }
+bool Vertex::IsEqual(Vertex inVert)
+{
+	return (Name() == inVert.Name()) * Pos().IsEqual(inVert.Pos());
+}
 
 
 
 Line::Line()
 {
-	vert1 = Vertex(); vert2 = Vertex(); length = 0.0;
+	length = 0.0;
 }
 Line::Line(std::wstring inName, Vertex inVert1, Vertex inVert2)
 {
@@ -126,30 +140,22 @@ Line::Line(std::wstring inName, Vertex inVert1, Vertex inVert2)
 	Vert2(inVert2);
 	CalculateLength();
 }
-Line::Line(std::wstring inName, Vertex inVert, std::wstring vert2, double inLength)
+Line::Line(std::wstring inName, Vertex inVert, float inLength)
 {
 	Name(inName);
 	Vert1(inVert);
 	Length(inLength);
 	MoveVertexByLength();
+	vert2.Name(Vert1().Name() + L"₁");
 }
 
 Vertex Line::Vert1(void)
 {
 	return vert1;
 }
-
 void Line::Vert1(Vertex inVert)
 {
 	vert1.Copy(inVert); CalculateLength();
-}
-void Line::Vert1(Position inPos)
-{
-	vert1.Pos(inPos); CalculateLength();
-}
-void Line::Vert1(double inX, double inY)
-{
-	vert1.Pos(inX, inY); CalculateLength();
 }
 
 Vertex Line::Vert2(void)
@@ -160,20 +166,12 @@ void Line::Vert2(Vertex inVert)
 {
 	vert2.Copy(inVert); CalculateLength();
 }
-void Line::Vert2(Position inPos)
-{
-	vert2.Pos(inPos); CalculateLength();
-}
-void Line::Vert2(double inX, double inY)
-{
-	vert2.Pos(inX, inY); CalculateLength();
-}
 
-double Line::Length(void)
+float Line::Length(void)
 {
 	return length;
 }
-void Line::Length(double inLength)
+void Line::Length(float inLength)
 {
 	/* Input validation */
 	length = inLength;
@@ -194,6 +192,12 @@ void Line::Print()
 	vert2.Print();
 	std::wcout << L" | Length = " << length << L" Units";
 }
+bool Line::IsEqual(Line inLine)
+{
+	return Vert1().IsEqual(inLine.Vert1()) *
+		   Vert2().IsEqual(inLine.Vert2()) *
+		   (Length() == inLine.Length());
+}
 
 std::wstring Line::VertexName()
 {
@@ -201,7 +205,7 @@ std::wstring Line::VertexName()
 }
 void Line::CalculateLength()
 {
-	length = sqrt(
+	length = (float)sqrt(
 		pow((Vert1().Pos().X()- Vert2().Pos().X()),2) +
 		pow((Vert1().Pos().Y() - Vert2().Pos().Y()), 2)
 	);
@@ -218,42 +222,58 @@ void Line::MoveVertexByLength()
 
 Angle::Angle(void)
 {
-
+	turn = 0.0f;
 }
 Angle::Angle(Line inSide1, Line inSide2)
 {
-
+	/* Input validation */
+	if (inSide1.Vert2().IsEqual(inSide2.Vert1()) or
+		inSide1.Vert1().IsEqual(inSide2.Vert2()) or
+		inSide1.Vert1().IsEqual(inSide2.Vert1()) or
+		inSide1.Vert2().IsEqual(inSide2.Vert2()))
+	{
+		Side1(inSide1);
+		Side2(inSide2);
+		CalculateTurn();
+		Name(VertexName());
+	}
 }
 Angle::Angle(Vertex vert1, Vertex vert2, Vertex vert3)
 {
-
+	Side1(Line(L"k", vert1, vert2));
+	Side2(Line(L"l", vert2, vert3));
+	CalculateTurn();
+	Name(VertexName());
 }
 // Angle from Line and turn
 //  (figure out how to translate the 3rd vertex)
 
-double Angle::Turn(void)
+float Angle::Turn(void)
 {
 	return turn;
 }
-void Angle::Turn(double inTurn)
+void Angle::Turn(float inTurn)
 {
-
+	/* Input validation */
+	turn = inTurn;
 }
-double Angle::Degree(void)
+float Angle::Degree(void)
 {
 	return turn * 360;
 }
-void Angle::Degree(double inDeg)
+void Angle::Degree(float inDeg)
 {
-
+	/* Input validation */
+	turn = inDeg / 360;
 }
-double Angle::Radian(void)
+float Angle::Radian(void)
 {
-	return turn * Pi;
+	return turn * 2 * Pi;
 }
-void Angle::Radian(double inRad)
+void Angle::Radian(float inRad)
 {
-
+	/* Input validation */
+	turn = inRad / (2 * Pi);
 }
 
 Line Angle::Side1(void)
@@ -278,18 +298,46 @@ void Angle::Side2(Line inLine)
 
 void Angle::Copy(Angle inAng)
 {
-
+	Turn(inAng.Turn());
+	Side1(inAng.Side1());
+	Side2(inAng.Side2());
 }
-void Angle::Print(void)
+void Angle::Print(int mode)
 {
+	std::wcout << L"Angle " << Name();
 
+	if (mode % 2)
+		std::wcout << L" = " << Turn() << L" Turns";
+	mode /= 10;
+	if (mode % 2)
+		std::wcout << L" = " << Degree() << L"°";
+	mode /= 10;
+	if (mode % 2)
+		std::wcout << L" = " << Radian() << L" rad";
+}
+
+std::wstring Angle::VertexName()
+{
+	return Side1().Vert1().Name() +
+		   Side2().Vert1().Name() +
+		   Side2().Vert2().Name();
+}
+void Angle::CalculateTurn()
+{
+	Radian((float)acos((
+		(double)pow(Side1().Length(), 2) +
+		(double)pow(Side2().Length(), 2) -
+		(double)pow(Line(L"a", Side1().Vert1(), Side2().Vert2()).Length(), 2))
+		/
+		(2 * (double)Side1().Length() * (double)Side2().Length())
+	));
 }
 
 
 
 Triangle::Triangle()
 {
-	side1 = Line(); side2 = Line(); side3 = Line();
+
 }
 Triangle::Triangle(std::wstring inName, Line inSide1, Line inSide2, Line inSide3)
 {
@@ -344,15 +392,15 @@ void Triangle::Copy(Triangle inTrg)
 }
 void Triangle::Print()
 {
-	std::wcout << "Triangle " << Name() << "("  << VertexName() << "):\n";
-	std::wcout << "-  Perimeter = " << Perimeter() << " Units\n";
-	std::wcout << "-  Semiperimeter = " << SemiPerimeter() << " Units\n";
-	std::wcout << "-  Area = " << Area() << " Units^2\n";
-	std::wcout << "-  Sides:\n   =\t";
+	std::wcout << L"Triangle " << Name() << L"("  << VertexName() << L"):\n";
+	std::wcout << L"-  Perimeter = " << Perimeter() << L" Units\n";
+	std::wcout << L"-  Semiperimeter = " << SemiPerimeter() << L" Units\n";
+	std::wcout << L"-  Area = " << Area() << L" Units²\n";
+	std::wcout << L"-  Sides:\n   =\t";
 	side1.Print();
-	std::wcout << "\n   =\t";
+	std::wcout << L"\n   =\t";
 	side2.Print();
-	std::wcout << "\n   =\t";
+	std::wcout << L"\n   =\t";
 	side3.Print();
 }
 
@@ -362,17 +410,18 @@ std::wstring Triangle::VertexName()
 		   Side2().Vert1().Name() + 
 		   Side3().Vert1().Name();
 }
-double Triangle::Perimeter()
+float Triangle::Perimeter()
 {
 	return side1.Length() + side2.Length() + side3.Length();
 }
-double Triangle::SemiPerimeter()
+float Triangle::SemiPerimeter()
 {
 	return Perimeter() / 2;
 }
-double Triangle::Area()
+float Triangle::Area()
 {
-	return std::sqrt(SemiPerimeter() *
+	return std::sqrt(
+		SemiPerimeter() *
 		(SemiPerimeter() - side1.Length()) *
 		(SemiPerimeter() - side2.Length()) *
 		(SemiPerimeter() - side3.Length())

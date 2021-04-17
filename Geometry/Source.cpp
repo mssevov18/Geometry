@@ -6,15 +6,17 @@ int main()
 	empty = _setmode(_fileno(stdin), _O_U16TEXT);
 
 	Position pos(0.0, 0.0);
-	Line line(L"a", Vertex(L"A", pos), L"B", 10.0);
+	Line line(L"a", Vertex(L"A", pos), 10.0);
 	line.Print();
 	std::wcout << std::endl;
 	line.Length(line.Length() + 5.0);
 	line.Print();
 	std::wcout << std::endl;
 	pos.X(-5.0);
-	line.Vert1(pos);
+	line.Vert1(Vertex(line.Vert1().Name(), pos));
 	line.Print();
+	std::wcout << std::endl;
+	std::wcout << std::endl;
 	std::wcout << std::endl;
 
 	Vertex a = Vertex(L"A", Position(-0.5, 0.0));
@@ -32,6 +34,16 @@ int main()
 	Triangle ABC2 = Triangle(L"m", ab, bc, ca);
 	ABC2.Print();
 	std::wcout << std::endl;
+	std::wcout << std::endl;
+	std::wcout << std::endl;
 
+	Angle ang = Angle(ab, bc);
+	ang.Print(111);
+	std::wcout << std::endl;
 
+	Angle ang2 = Angle(a, b, c);
+	ang2.Print(111);
+	std::wcout << std::endl;
+
+	std::wcout << std::endl;
 }

@@ -5,21 +5,22 @@
 class Position
 {	
 protected:
-	double x;
-	double y;
+	float x;
+	float y;
 
 public:
 	Position();
-	Position(double inX, double inY);
+	Position(float inX, float inY);
 
-	double X(void);
-	void X(double inX);
+	float X(void);
+	void  X(float inX);
 	
-	double Y(void);
-	void Y(double inY);
+	float Y(void);
+	void  Y(float inY);
 	
 	void Copy(Position inPos);
 	void Print();
+	bool IsEqual(Position inPos);
 };
 
 
@@ -32,11 +33,12 @@ public:
 	Shape();
 	Shape(std::wstring inName);
 
-	std::wstring Name(void);
-	void Name(std::wstring inName);
+	virtual std::wstring Name(void);
+	virtual void Name(std::wstring inName);
 
 	virtual void Copy(Shape inShape);
 	virtual void Print();
+	virtual bool IsEqual(Shape inShape);
 };
 
 
@@ -48,13 +50,14 @@ protected:
 public:
 	Vertex();
 	Vertex(std::wstring inName, Position inPos);
+	Vertex(std::wstring inName, float inX, float inY);
 
 	Position Pos(void);
-	void Pos(Position inPos);
-	void Pos(double inX, double inY);
+	void     Pos(Position inPos);
 
 	void Copy(Vertex inVert);
 	void Print();
+	bool IsEqual(Vertex inVert);
 };
 
 
@@ -62,28 +65,25 @@ class Line :public Shape
 {
 protected:
 	Vertex vert1, vert2;
-	double length;
+	float  length;
 
 public:
 	Line();
 	Line(std::wstring inName, Vertex inVert1, Vertex inVert2);
-	Line(std::wstring inName, Vertex inVert, std::wstring vert2, double inLength);
+	Line(std::wstring inName, Vertex inVert, float inLength);
 
 	Vertex Vert1(void);
-	void Vert1(Vertex inVert);
-	void Vert1(Position inPos);
-	void Vert1(double inX, double inY);
+	void   Vert1(Vertex inVert);
 
 	Vertex Vert2(void);
-	void Vert2(Vertex inVert);
-	void Vert2(Position inPos);
-	void Vert2(double inX, double inY);
+	void   Vert2(Vertex inVert);
 
-	double Length(void);
-	void Length(double inLength);
+	float Length(void);
+	void  Length(float inLength);
 
 	void Copy(Line inLine);
 	void Print();
+	bool IsEqual(Line inLine);
 
 	std::wstring VertexName();
 	void CalculateLength();
@@ -94,9 +94,9 @@ public:
 class Angle: public Shape
 {
 protected:
-	double turn;
-	Line side1;
-	Line side2;
+	float turn;
+	Line  side1;
+	Line  side2;
 
 public:
 	Angle(void);
@@ -105,12 +105,12 @@ public:
 	// Angle from Line and turn
 	//  (figure out how to translate the 3rd vertex)
 
-	double Turn(void);
-	void Turn(double inTurn);
-	double Degree(void);
-	void Degree(double inDeg);
-	double Radian(void);
-	void Radian(double inRad);
+	float Turn(void);
+	void  Turn(float inTurn);
+	float Degree(void);
+	void  Degree(float inDeg);
+	float Radian(void);
+	void  Radian(float inRad);
 
 	Line Side1(void);
 	void Side1(Line inLine);
@@ -119,7 +119,14 @@ public:
 	void Side2(Line inLine);
 
 	void Copy(Angle inAng);
-	void Print(void);
+	//##1 - turns
+	//#1# - degrees
+	//1## - radians
+	void Print(int mode = 1);
+	bool IsEqual(Angle inAng);
+
+	std::wstring VertexName();
+	void CalculateTurn();
 };
 
 
@@ -146,11 +153,12 @@ public:
 
 	void Copy(Triangle inTrg);
 	void Print();
+	bool IsEqual(Triangle inTrg);
 
 	std::wstring VertexName();
-	double Perimeter();
-	double SemiPerimeter();
-	double Area();
+	float Perimeter();
+	float SemiPerimeter();
+	float Area();
 
 	/*
 	//Semiperimeter (s) - value | >= 0
